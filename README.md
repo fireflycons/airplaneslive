@@ -48,3 +48,7 @@ for {
 ```
 
 API responses may omit aircraft fields when data is unavailable.
+
+## Package Documentation
+
+See [here](./docs/package.md)
