@@ -258,7 +258,9 @@ func (api *Api) doRequest(ctx context.Context, url string, headers http.Header) 
 		return nil, fmt.Errorf("failed to perform request: %w", err)
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if slices.Contains([]int{400, 502, 503}, resp.StatusCode) {
 		var errResp errorResponse

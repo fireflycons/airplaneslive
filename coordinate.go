@@ -6,10 +6,17 @@ import (
 )
 
 // Coordinate represents a geographic position in decimal degrees.
+// It is also a convenience type providing common geospatial calculations.
 type Coordinate struct {
 	lat float64
 	lon float64
 }
+
+const (
+	// Earth's mean radius in nautical miles (6371.0088 km / 1.852 km/NM)
+	earthRadiusNM    = 3440.0695
+	degreesToRadians = math.Pi / 180
+)
 
 // NewCoordinate creates a coordinate and returns an error if either value is out of range.
 func NewCoordinate(lat, lon float64) (Coordinate, error) {
@@ -33,37 +40,39 @@ func MustNewCoordinate(lat, lon float64) Coordinate {
 
 // DistanceTo calculates the distance in nautical miles from this coordinate to other.
 func (co Coordinate) DistanceTo(other Coordinate) float64 {
+	return haversineDistance(co, other)
+}
 
-	// Earth's mean radius in nautical miles (6371.0088 km / 1.852 km/NM)
-	const earthRadiusNM = 3440.0695
+// IsWithinRadius reports whether other is within radius nautical miles of this coordinate.
+func (co Coordinate) IsWithinRadius(other Coordinate, radius float64) bool {
+	if radius < 0 {
+		return false
+	}
 
-	// Convert latitudes and longitudes from degrees to radians
-	lat1 := co.lat * math.Pi / 180
-	lon1 := co.lon * math.Pi / 180
-	lat2 := other.lat * math.Pi / 180
-	lon2 := other.lon * math.Pi / 180
+	// Reject points outside the latitude/longitude bounds before calculating the exact distance.
+	degreesPerNauticalMile := 180 / (math.Pi * earthRadiusNM)
+	latitudeDelta := radius * degreesPerNauticalMile
+	longitudeDelta := latitudeDelta / math.Max(math.Abs(math.Cos(co.lat*degreesToRadians)), 1e-12)
+	if latitudeDelta >= 90-math.Abs(co.lat) {
+		longitudeDelta = 180
+	}
+	longitudeDifference := math.Abs(other.lon - co.lon)
+	longitudeDifference = math.Min(longitudeDifference, 360-longitudeDifference)
+	if math.Abs(other.lat-co.lat) > latitudeDelta || longitudeDifference > longitudeDelta {
+		return false
+	}
 
-	// Haversine formula
-	dLat := lat2 - lat1
-	dLon := lon2 - lon1
-
-	sinDLat := math.Sin(dLat / 2)
-	sinDLon := math.Sin(dLon / 2)
-
-	h := (sinDLat * sinDLat) + math.Cos(lat1)*math.Cos(lat2)*(sinDLon*sinDLon)
-	c := 2 * math.Asin(math.Min(1, math.Sqrt(h))) // math.Min prevents rounding issues exceeding 1.0
-
-	return earthRadiusNM * c
+	return haversineDistance(co, other) <= radius
 }
 
 // HeadingTo calculates the initial bearing when starting at this point to get to the destination coordinate.
 func (co Coordinate) HeadingTo(other Coordinate) float64 {
 
 	// Convert latitudes and longitudes from degrees to radians
-	lat1 := co.lat * math.Pi / 180
-	lon1 := co.lon * math.Pi / 180
-	lat2 := other.lat * math.Pi / 180
-	lon2 := other.lon * math.Pi / 180
+	lat1 := co.lat * degreesToRadians
+	lon1 := co.lon * degreesToRadians
+	lat2 := other.lat * degreesToRadians
+	lon2 := other.lon * degreesToRadians
 
 	dLon := lon2 - lon1
 
@@ -94,4 +103,25 @@ func checkLon(lon float64) error {
 		return fmt.Errorf("invalid longitude %f: must be in [-180, 180]", lon)
 	}
 	return nil
+}
+
+func haversineDistance(co, other Coordinate) float64 {
+
+	// Convert latitudes and longitudes from degrees to radians
+	lat1 := co.lat * degreesToRadians
+	lon1 := co.lon * degreesToRadians
+	lat2 := other.lat * degreesToRadians
+	lon2 := other.lon * degreesToRadians
+
+	// Haversine formula
+	dLat := lat2 - lat1
+	dLon := lon2 - lon1
+
+	sinDLat := math.Sin(dLat / 2)
+	sinDLon := math.Sin(dLon / 2)
+
+	h := (sinDLat * sinDLat) + math.Cos(lat1)*math.Cos(lat2)*(sinDLon*sinDLon)
+	c := 2 * math.Asin(math.Min(1, math.Sqrt(h))) // math.Min prevents rounding issues exceeding 1.0
+
+	return earthRadiusNM * c
 }
