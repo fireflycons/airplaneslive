@@ -48,8 +48,9 @@ func (r V2Response) closestTo(coord Coordinate, airborne bool) *Aircraft {
 		return nil
 	}
 
-	var min_dist float64 = impossibleDistance
 	var result Aircraft
+
+	min_dist := impossibleDistance
 
 	for _, ac := range r.Ac {
 		if airborne && ac.AltBaro.IsGround {

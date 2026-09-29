@@ -15,34 +15,34 @@
 // API's default page, then advance options with the returned list's
 // [List.NextOffset] method:
 //
-//     opts := airplaneslive.DefaultListOpts
-//     for {
-//         page, err := api.Airlines(ctx, "", "", "", "", "", opts)
-//         if err != nil {
-//             return err
-//         }
-//         if len(page.Results) == 0 {
-//             break
-//         }
-//         opts = page.NextOffset(opts)
-//     }
+//	opts := airplaneslive.DefaultListOpts
+//	for {
+//	    page, err := api.Airlines(ctx, "", "", "", "", "", opts)
+//	    if err != nil {
+//	        return err
+//	    }
+//	    if len(page.Results) == 0 {
+//	        break
+//	    }
+//	    opts = page.NextOffset(opts)
+//	}
 //
 // A basic aircraft query looks like:
 //
-//     ctx := context.Background()
-//     api, err := airplaneslive.NewApi()
-//     if err != nil {
-//         return err
-//     }
-//     point, err := airplaneslive.NewCoordinate(51.5074, -0.1278)
-//     if err != nil {
-//         return err
-//     }
-//     response, err := api.AircraftWithinRadius(ctx, point, 10)
-//     if err != nil {
-//         return err
-//     }
-//     _ = response.Ac
+//	ctx := context.Background()
+//	api, err := airplaneslive.NewApi()
+//	if err != nil {
+//	    return err
+//	}
+//	point, err := airplaneslive.NewCoordinate(51.5074, -0.1278)
+//	if err != nil {
+//	    return err
+//	}
+//	response, err := api.AircraftWithinRadius(ctx, point, 10)
+//	if err != nil {
+//	    return err
+//	}
+//	_ = response.Ac
 //
 // The examples assume code is inside a function returning an error. API
 // responses may omit aircraft fields when data is unavailable.

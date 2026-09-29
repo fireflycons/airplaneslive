@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/fireflycons/airplaneslive"
@@ -33,4 +34,6 @@ func main() {
 		// Lists are paginated - get next page
 		opts = list.NextOffset(opts)
 	}
+
+	fmt.Println(len(airlines), "downloaded")
 }
