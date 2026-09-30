@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/fireflycons/airplaneslive"
+	"github.com/fireflycons/geocoord"
 )
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 	}
 
 	// London Centre - generally regarded as Charing Cross
-	london := airplaneslive.MustNewCoordinate(51.5074, -0.1278) // London coordinates
+	london := geocoord.MustNewCoordinate(51.5074, -0.1278) // London coordinates
 	radius := 10.0
 
 	response, err := api.AircraftWithinRadius(ctx, london, radius)

@@ -5,6 +5,7 @@ go 1.26.3
 require (
 	github.com/bogdanfinn/fhttp v0.6.9
 	github.com/bogdanfinn/tls-client v1.16.0
+	github.com/fireflycons/geocoord v0.1.1
 	github.com/stretchr/testify v1.12.1
 )
 

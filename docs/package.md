@@ -10,7 +10,7 @@ Package airplaneslive provides a Go client for aircraft position and reference\-
 
 Create an [Api](<#Api>) with [NewApi](<#NewApi>), then pass a context to each request. Aircraft queries include positions within a radius and positions by registration. Reference\-data methods search or list airlines, airports, cities, countries, and timezones.
 
-Coordinates use decimal degrees, with latitude in \[\-90, 90\] and longitude in \[\-180, 180\]. [NewCoordinate](<#NewCoordinate>) validates these ranges; [MustNewCoordinate](<#MustNewCoordinate>) panics when they are exceeded. Aircraft distances and radius values are in nautical miles, and headings are in degrees.
+Coordinates use \[geocoord.Coordinate\] values from github.com/fireflycons/geocoord. Its NewCoordinate and MustNewCoordinate constructors validate latitude and longitude ranges. Aircraft distances and radius values are in nautical miles, and headings are in degrees.
 
 Reference\-data results are paginated. Pass [DefaultListOpts](<#DefaultListOpts>) to request the API's default page, then advance options with the returned list's [List.NextOffset](<#List.NextOffset>) method:
 
@@ -21,6 +21,7 @@ for {
     if err != nil {
         return err
     }
+    // Do something with page, then
     if len(page.Results) == 0 {
         break
     }
@@ -36,7 +37,7 @@ api, err := airplaneslive.NewApi()
 if err != nil {
     return err
 }
-point, err := airplaneslive.NewCoordinate(51.5074, -0.1278)
+point, err := geocoord.NewCoordinate(51.5074, -0.1278)
 if err != nil {
     return err
 }
@@ -47,7 +48,7 @@ if err != nil {
 _ = response.Ac
 ```
 
-The examples assume code is inside a function returning an error. API responses may omit aircraft fields when data is unavailable.
+The examples assume code is inside a function returning an error and imports context, github.com/fireflycons/airplaneslive, and github.com/fireflycons/geocoord. API responses may omit aircraft fields when data is unavailable.
 
 ## Index
 
@@ -56,9 +57,9 @@ The examples assume code is inside a function returning an error. API responses 
 - [type Aircraft](<#Aircraft>)
   - [func \(a Aircraft\) AirlineIcao\(\) string](<#Aircraft.AirlineIcao>)
   - [func \(a Aircraft\) Bank\(\) Bank](<#Aircraft.Bank>)
-  - [func \(a Aircraft\) BearingFrom\(point Coordinate\) float64](<#Aircraft.BearingFrom>)
-  - [func \(a Aircraft\) DistanceFrom\(point Coordinate\) float64](<#Aircraft.DistanceFrom>)
-  - [func \(a Aircraft\) Location\(\) Coordinate](<#Aircraft.Location>)
+  - [func \(a Aircraft\) BearingFrom\(point geocoord.Coordinate\) float64](<#Aircraft.BearingFrom>)
+  - [func \(a Aircraft\) DistanceFrom\(point geocoord.Coordinate\) float64](<#Aircraft.DistanceFrom>)
+  - [func \(a Aircraft\) Location\(\) geocoord.Coordinate](<#Aircraft.Location>)
   - [func \(a Aircraft\) Pitch\(\) Pitch](<#Aircraft.Pitch>)
 - [type Airline](<#Airline>)
 - [type AirlineList](<#AirlineList>)
@@ -72,7 +73,7 @@ The examples assume code is inside a function returning an error. API responses 
 - [type Api](<#Api>)
   - [func NewApi\(\) \(\*Api, error\)](<#NewApi>)
   - [func \(api \*Api\) AircraftByReg\(ctx context.Context, reg \[\]string\) \(\*V2Response, error\)](<#Api.AircraftByReg>)
-  - [func \(api \*Api\) AircraftWithinRadius\(ctx context.Context, coord Coordinate, radius float64\) \(\*V2Response, error\)](<#Api.AircraftWithinRadius>)
+  - [func \(api \*Api\) AircraftWithinRadius\(ctx context.Context, coord geocoord.Coordinate, radius float64\) \(\*V2Response, error\)](<#Api.AircraftWithinRadius>)
   - [func \(api \*Api\) Airlines\(ctx context.Context, name, callsign, countryCode, iataCode, icaoCode string, opts ListOpts\) \(\*AirlineList, error\)](<#Api.Airlines>)
   - [func \(api \*Api\) Airports\(ctx context.Context, cityCode, countryCode, iataCode, icaoCode string, opts ListOpts\) \(\*AirportList, error\)](<#Api.Airports>)
   - [func \(api \*Api\) Cities\(ctx context.Context, cityCode, countryCode string, opts ListOpts\) \(\*CityList, error\)](<#Api.Cities>)
@@ -84,12 +85,6 @@ The examples assume code is inside a function returning an error. API responses 
 - [type City](<#City>)
 - [type CityList](<#CityList>)
   - [func \(l \*CityList\) NextOffset\(o ListOpts\) ListOpts](<#CityList.NextOffset>)
-- [type Coordinate](<#Coordinate>)
-  - [func MustNewCoordinate\(lat, lon float64\) Coordinate](<#MustNewCoordinate>)
-  - [func NewCoordinate\(lat, lon float64\) \(Coordinate, error\)](<#NewCoordinate>)
-  - [func \(co Coordinate\) DistanceTo\(other Coordinate\) float64](<#Coordinate.DistanceTo>)
-  - [func \(co Coordinate\) HeadingTo\(other Coordinate\) float64](<#Coordinate.HeadingTo>)
-  - [func \(co Coordinate\) IsWithinRadius\(other Coordinate, radius float64\) bool](<#Coordinate.IsWithinRadius>)
 - [type Country](<#Country>)
 - [type CountryList](<#CountryList>)
   - [func \(l \*CountryList\) NextOffset\(o ListOpts\) ListOpts](<#CountryList.NextOffset>)
@@ -104,8 +99,8 @@ The examples assume code is inside a function returning an error. API responses 
 - [type TimezoneList](<#TimezoneList>)
   - [func \(l \*TimezoneList\) NextOffset\(o ListOpts\) ListOpts](<#TimezoneList.NextOffset>)
 - [type V2Response](<#V2Response>)
-  - [func \(r V2Response\) ClosestTo\(coord Coordinate\) \*Aircraft](<#V2Response.ClosestTo>)
-  - [func \(r V2Response\) ClosestToAirborne\(coord Coordinate\) \*Aircraft](<#V2Response.ClosestToAirborne>)
+  - [func \(r V2Response\) ClosestTo\(coord geocoord.Coordinate\) \*Aircraft](<#V2Response.ClosestTo>)
+  - [func \(r V2Response\) ClosestToAirborne\(coord geocoord.Coordinate\) \*Aircraft](<#V2Response.ClosestToAirborne>)
   - [func \(r V2Response\) MarshalJSON\(\) \(\[\]byte, error\)](<#V2Response.MarshalJSON>)
   - [func \(r \*V2Response\) UnmarshalJSON\(data \[\]byte\) error](<#V2Response.UnmarshalJSON>)
 
@@ -147,7 +142,7 @@ var DefaultListOpts = ListOpts{}
 ```
 
 <a name="Aircraft"></a>
-## type [Aircraft](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L64-L242>)
+## type [Aircraft](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L66-L244>)
 
 Aircraft represents an individual aircraft record containing position, identification, and telemetry data.
 
@@ -334,7 +329,7 @@ type Aircraft struct {
 ```
 
 <a name="Aircraft.AirlineIcao"></a>
-### func \(Aircraft\) [AirlineIcao](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L245>)
+### func \(Aircraft\) [AirlineIcao](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L247>)
 
 ```go
 func (a Aircraft) AirlineIcao() string
@@ -343,7 +338,7 @@ func (a Aircraft) AirlineIcao() string
 AirlineIcao returns the ICAO airline code derived from the first three characters of the flight callsign.
 
 <a name="Aircraft.Bank"></a>
-### func \(Aircraft\) [Bank](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L282>)
+### func \(Aircraft\) [Bank](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L284>)
 
 ```go
 func (a Aircraft) Bank() Bank
@@ -352,34 +347,34 @@ func (a Aircraft) Bank() Bank
 Bank returns the aircraft's turn direction based on its roll angle.
 
 <a name="Aircraft.BearingFrom"></a>
-### func \(Aircraft\) [BearingFrom](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L264>)
+### func \(Aircraft\) [BearingFrom](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L266>)
 
 ```go
-func (a Aircraft) BearingFrom(point Coordinate) float64
+func (a Aircraft) BearingFrom(point geocoord.Coordinate) float64
 ```
 
 BearingFrom calculates the initial bearing from this point to the aircraft.
 
 <a name="Aircraft.DistanceFrom"></a>
-### func \(Aircraft\) [DistanceFrom](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L258>)
+### func \(Aircraft\) [DistanceFrom](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L260>)
 
 ```go
-func (a Aircraft) DistanceFrom(point Coordinate) float64
+func (a Aircraft) DistanceFrom(point geocoord.Coordinate) float64
 ```
 
 DistanceFrom calculates the distance the aircarft is from the given point.
 
 <a name="Aircraft.Location"></a>
-### func \(Aircraft\) [Location](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L253>)
+### func \(Aircraft\) [Location](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L255>)
 
 ```go
-func (a Aircraft) Location() Coordinate
+func (a Aircraft) Location() geocoord.Coordinate
 ```
 
 Location returns the aircraft's lat/long position as a coordinate.
 
 <a name="Aircraft.Pitch"></a>
-### func \(Aircraft\) [Pitch](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L270>)
+### func \(Aircraft\) [Pitch](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L272>)
 
 ```go
 func (a Aircraft) Pitch() Pitch
@@ -499,7 +494,7 @@ func (l *AirportList) NextOffset(o ListOpts) ListOpts
 NextOffset returns list options advanced by the number of results in the page.
 
 <a name="AltBaro"></a>
-## type [AltBaro](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L312-L317>)
+## type [AltBaro](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L314-L319>)
 
 AltBaro represents barometric altitude, which may be an integer altitude or the value "ground".
 
@@ -513,7 +508,7 @@ type AltBaro struct {
 ```
 
 <a name="AltBaro.MarshalJSON"></a>
-### func \(AltBaro\) [MarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L341>)
+### func \(AltBaro\) [MarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L343>)
 
 ```go
 func (a AltBaro) MarshalJSON() ([]byte, error)
@@ -522,7 +517,7 @@ func (a AltBaro) MarshalJSON() ([]byte, error)
 MarshalJSON encodes the altitude as an integer or the string "ground".
 
 <a name="AltBaro.UnmarshalJSON"></a>
-### func \(\*AltBaro\) [UnmarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L320>)
+### func \(\*AltBaro\) [UnmarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L322>)
 
 ```go
 func (a *AltBaro) UnmarshalJSON(b []byte) error
@@ -531,7 +526,7 @@ func (a *AltBaro) UnmarshalJSON(b []byte) error
 UnmarshalJSON decodes an integer altitude or the string "ground".
 
 <a name="Api"></a>
-## type [Api](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L46-L49>)
+## type [Api](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L47-L50>)
 
 Api provides access to the Airplanes.live aircraft and reference\-data APIs.
 
@@ -542,7 +537,7 @@ type Api struct {
 ```
 
 <a name="NewApi"></a>
-### func [NewApi](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L69>)
+### func [NewApi](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L70>)
 
 ```go
 func NewApi() (*Api, error)
@@ -551,7 +546,7 @@ func NewApi() (*Api, error)
 NewApi creates an API client configured for Airplanes.live requests.
 
 <a name="Api.AircraftByReg"></a>
-### func \(\*Api\) [AircraftByReg](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L96>)
+### func \(\*Api\) [AircraftByReg](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L97>)
 
 ```go
 func (api *Api) AircraftByReg(ctx context.Context, reg []string) (*V2Response, error)
@@ -560,16 +555,16 @@ func (api *Api) AircraftByReg(ctx context.Context, reg []string) (*V2Response, e
 AircraftByReg returns aircraft positions matching the supplied registrations.
 
 <a name="Api.AircraftWithinRadius"></a>
-### func \(\*Api\) [AircraftWithinRadius](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L74>)
+### func \(\*Api\) [AircraftWithinRadius](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L75>)
 
 ```go
-func (api *Api) AircraftWithinRadius(ctx context.Context, coord Coordinate, radius float64) (*V2Response, error)
+func (api *Api) AircraftWithinRadius(ctx context.Context, coord geocoord.Coordinate, radius float64) (*V2Response, error)
 ```
 
 AircraftWithinRadius returns aircraft within radius nautical miles of coord.
 
 <a name="Api.Airlines"></a>
-### func \(\*Api\) [Airlines](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L160>)
+### func \(\*Api\) [Airlines](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L161>)
 
 ```go
 func (api *Api) Airlines(ctx context.Context, name, callsign, countryCode, iataCode, icaoCode string, opts ListOpts) (*AirlineList, error)
@@ -578,7 +573,7 @@ func (api *Api) Airlines(ctx context.Context, name, callsign, countryCode, iataC
 Airlines searches or lists airlines matching the supplied filters. An empty string for a filter repesents all possible values for that filter.
 
 <a name="Api.Airports"></a>
-### func \(\*Api\) [Airports](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L135>)
+### func \(\*Api\) [Airports](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L136>)
 
 ```go
 func (api *Api) Airports(ctx context.Context, cityCode, countryCode, iataCode, icaoCode string, opts ListOpts) (*AirportList, error)
@@ -587,7 +582,7 @@ func (api *Api) Airports(ctx context.Context, cityCode, countryCode, iataCode, i
 Airports searches or lists airports matching the supplied filters. An empty string for a filter repesents all possible values for that filter.
 
 <a name="Api.Cities"></a>
-### func \(\*Api\) [Cities](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L210>)
+### func \(\*Api\) [Cities](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L211>)
 
 ```go
 func (api *Api) Cities(ctx context.Context, cityCode, countryCode string, opts ListOpts) (*CityList, error)
@@ -596,7 +591,7 @@ func (api *Api) Cities(ctx context.Context, cityCode, countryCode string, opts L
 Cities searches or lists cities matching the supplied filters. An empty string for a filter repesents all possible values for that filter.
 
 <a name="Api.Countries"></a>
-### func \(\*Api\) [Countries](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L186>)
+### func \(\*Api\) [Countries](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L187>)
 
 ```go
 func (api *Api) Countries(ctx context.Context, code, code3, continent string, opts ListOpts) (*CountryList, error)
@@ -605,7 +600,7 @@ func (api *Api) Countries(ctx context.Context, code, code3, continent string, op
 Countries searches or lists countries matching the supplied filters. An empty string for a filter repesents all possible values for that filter.
 
 <a name="Api.TaggedMilitaryAircraft"></a>
-### func \(\*Api\) [TaggedMilitaryAircraft](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L117>)
+### func \(\*Api\) [TaggedMilitaryAircraft](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L118>)
 
 ```go
 func (api *Api) TaggedMilitaryAircraft(ctx context.Context) (*V2Response, error)
@@ -614,7 +609,7 @@ func (api *Api) TaggedMilitaryAircraft(ctx context.Context) (*V2Response, error)
 TaggedMilitaryAircraft returns all broadcasting miltary aircraft worldwide. Which fields are populated varies, likely depending on what each airforce is prepared to disclose.
 
 <a name="Api.Timezones"></a>
-### func \(\*Api\) [Timezones](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L233>)
+### func \(\*Api\) [Timezones](<https://github.com/fireflycons/airplaneslive/blob/main/api.go#L234>)
 
 ```go
 func (api *Api) Timezones(ctx context.Context, opts ListOpts) (*TimezoneList, error)
@@ -623,7 +618,7 @@ func (api *Api) Timezones(ctx context.Context, opts ListOpts) (*TimezoneList, er
 Timezones lists all timezone records.
 
 <a name="Bank"></a>
-## type [Bank](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L37>)
+## type [Bank](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L39>)
 
 Bank describes an aircraft's turn state \(roll\). Actual values can be obtained from [Aircraft](<#Aircraft>) properties.
 
@@ -632,7 +627,7 @@ type Bank int
 ```
 
 <a name="Bank.String"></a>
-### func \(Bank\) [String](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L49>)
+### func \(Bank\) [String](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L51>)
 
 ```go
 func (b Bank) String() string
@@ -696,62 +691,6 @@ func (l *CityList) NextOffset(o ListOpts) ListOpts
 ```
 
 NextOffset returns list options advanced by the number of results in the page.
-
-<a name="Coordinate"></a>
-## type [Coordinate](<https://github.com/fireflycons/airplaneslive/blob/main/coordinate.go#L10-L13>)
-
-Coordinate represents a geographic position in decimal degrees. It is also a convenience type providing common geospatial calculations.
-
-```go
-type Coordinate struct {
-    // contains filtered or unexported fields
-}
-```
-
-<a name="MustNewCoordinate"></a>
-### func [MustNewCoordinate](<https://github.com/fireflycons/airplaneslive/blob/main/coordinate.go#L33>)
-
-```go
-func MustNewCoordinate(lat, lon float64) Coordinate
-```
-
-MustNewCoordinate creates a coordinate and panics if either value is out of range.
-
-<a name="NewCoordinate"></a>
-### func [NewCoordinate](<https://github.com/fireflycons/airplaneslive/blob/main/coordinate.go#L22>)
-
-```go
-func NewCoordinate(lat, lon float64) (Coordinate, error)
-```
-
-NewCoordinate creates a coordinate and returns an error if either value is out of range.
-
-<a name="Coordinate.DistanceTo"></a>
-### func \(Coordinate\) [DistanceTo](<https://github.com/fireflycons/airplaneslive/blob/main/coordinate.go#L42>)
-
-```go
-func (co Coordinate) DistanceTo(other Coordinate) float64
-```
-
-DistanceTo calculates the distance in nautical miles from this coordinate to other.
-
-<a name="Coordinate.HeadingTo"></a>
-### func \(Coordinate\) [HeadingTo](<https://github.com/fireflycons/airplaneslive/blob/main/coordinate.go#L69>)
-
-```go
-func (co Coordinate) HeadingTo(other Coordinate) float64
-```
-
-HeadingTo calculates the initial bearing when starting at this point to get to the destination coordinate.
-
-<a name="Coordinate.IsWithinRadius"></a>
-### func \(Coordinate\) [IsWithinRadius](<https://github.com/fireflycons/airplaneslive/blob/main/coordinate.go#L47>)
-
-```go
-func (co Coordinate) IsWithinRadius(other Coordinate, radius float64) bool
-```
-
-IsWithinRadius reports whether other is within radius nautical miles of this coordinate.
 
 <a name="Country"></a>
 ## type [Country](<https://github.com/fireflycons/airplaneslive/blob/main/country.go#L4-L22>)
@@ -849,7 +788,7 @@ func NewListOpts(limit, offset int, fields ...string) ListOpts
 NewListOpts creates list options with the given limit, offset, and selected fields.
 
 <a name="Pitch"></a>
-## type [Pitch](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L10>)
+## type [Pitch](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L12>)
 
 Pitch describes an aircraft's vertical direction. Actual values can be obtained from [Aircraft](<#Aircraft>) properties.
 
@@ -858,7 +797,7 @@ type Pitch int
 ```
 
 <a name="Pitch.String"></a>
-### func \(Pitch\) [String](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L22>)
+### func \(Pitch\) [String](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L24>)
 
 ```go
 func (p Pitch) String() string
@@ -867,7 +806,7 @@ func (p Pitch) String() string
 String returns the textual description of the pitch direction.
 
 <a name="Pos"></a>
-## type [Pos](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L294-L309>)
+## type [Pos](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L296-L311>)
 
 Pos represents last known position object details.
 
@@ -930,7 +869,7 @@ func (l *TimezoneList) NextOffset(o ListOpts) ListOpts
 NextOffset returns list options advanced by the number of results in the page.
 
 <a name="V2Response"></a>
-## type [V2Response](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L9-L27>)
+## type [V2Response](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L11-L29>)
 
 V2Response represents the top\-level aircraft v2 response envelope.
 
@@ -957,25 +896,25 @@ type V2Response struct {
 ```
 
 <a name="V2Response.ClosestTo"></a>
-### func \(V2Response\) [ClosestTo](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L31>)
+### func \(V2Response\) [ClosestTo](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L33>)
 
 ```go
-func (r V2Response) ClosestTo(coord Coordinate) *Aircraft
+func (r V2Response) ClosestTo(coord geocoord.Coordinate) *Aircraft
 ```
 
 ClosestTo returns the nearest aircraft, whether airborne or on the ground, to coord. It returns nil if the response contains no aircraft.
 
 <a name="V2Response.ClosestToAirborne"></a>
-### func \(V2Response\) [ClosestToAirborne](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L38>)
+### func \(V2Response\) [ClosestToAirborne](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L40>)
 
 ```go
-func (r V2Response) ClosestToAirborne(coord Coordinate) *Aircraft
+func (r V2Response) ClosestToAirborne(coord geocoord.Coordinate) *Aircraft
 ```
 
 ClosestToAirborne returns the nearest airborne aircraft to coord. It returns nil if the response contains no airborne aircraft.
 
 <a name="V2Response.MarshalJSON"></a>
-### func \(V2Response\) [MarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L102>)
+### func \(V2Response\) [MarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L104>)
 
 ```go
 func (r V2Response) MarshalJSON() ([]byte, error)
@@ -984,7 +923,7 @@ func (r V2Response) MarshalJSON() ([]byte, error)
 MarshalJSON encodes UTC times as millisecond Unix timestamps.
 
 <a name="V2Response.UnmarshalJSON"></a>
-### func \(\*V2Response\) [UnmarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L75>)
+### func \(\*V2Response\) [UnmarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L77>)
 
 ```go
 func (r *V2Response) UnmarshalJSON(data []byte) error

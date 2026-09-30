@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/fireflycons/geocoord"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -24,7 +25,7 @@ func TestApiEndpoints(t *testing.T) {
 			path:  "/v2/point/51.500000/-0.120000/25.000000",
 			query: url.Values{},
 			call: func(api *Api) (any, error) {
-				return api.AircraftWithinRadius(t.Context(), MustNewCoordinate(51.5, -0.12), 25)
+				return api.AircraftWithinRadius(t.Context(), geocoord.MustNewCoordinate(51.5, -0.12), 25)
 			},
 			responseBody: `{"ac":[],"msg":"ready","now":0,"total":2}`,
 			assertResponse: func(t *testing.T, response any) {
@@ -198,7 +199,7 @@ func TestDoRequestErrors(t *testing.T) {
 func TestAircraftWithinRadiusRejectsNonPositiveRadius(t *testing.T) {
 	api := &Api{}
 	for _, radius := range []float64{0, -1} {
-		_, err := api.AircraftWithinRadius(t.Context(), MustNewCoordinate(0, 0), radius)
+		_, err := api.AircraftWithinRadius(t.Context(), geocoord.MustNewCoordinate(0, 0), radius)
 		assert.EqualError(t, err, "radius must be greater than 0")
 	}
 }
