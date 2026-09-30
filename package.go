@@ -21,6 +21,7 @@
 //	    if err != nil {
 //	        return err
 //	    }
+//	    // Do something with page, then
 //	    if len(page.Results) == 0 {
 //	        break
 //	    }
