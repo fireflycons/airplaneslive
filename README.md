@@ -6,7 +6,7 @@ Create an `Api` with `NewApi`, then pass a context to each request. Aircraft que
 
 ## Coordinates and Units
 
-Coordinates use decimal degrees, with latitude in `[-90, 90]` and longitude in `[-180, 180]`. `NewCoordinate` validates these ranges; `MustNewCoordinate` panics when they are exceeded. Aircraft distances and radius values are in nautical miles, and headings are in degrees.
+Coordinates are `geocoord.Coordinate` values from [github.com/fireflycons/geocoord](https://github.com/fireflycons/geocoord). Use `geocoord.NewCoordinate` to validate latitude in `[-90, 90]` and longitude in `[-180, 180]`, or `geocoord.MustNewCoordinate` to panic on invalid values. Aircraft distances and radius values are in nautical miles, and headings are in degrees.
 
 ## Aircraft Query
 
@@ -16,7 +16,7 @@ api, err := airplaneslive.NewApi()
 if err != nil {
     return err
 }
-point, err := airplaneslive.NewCoordinate(51.5074, -0.1278)
+point, err := geocoord.NewCoordinate(51.5074, -0.1278)
 if err != nil {
     return err
 }
@@ -27,7 +27,7 @@ if err != nil {
 _ = response.Ac
 ```
 
-This example assumes it is inside a function returning an error. Import `context` and the `airplaneslive` package in your application.
+This example assumes it is inside a function returning an error. Import `context`, `github.com/fireflycons/airplaneslive`, and `github.com/fireflycons/geocoord` in your application.
 
 ## Reference-Data Pagination
 

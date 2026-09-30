@@ -12,6 +12,7 @@ import (
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
 	"github.com/bogdanfinn/tls-client/profiles"
+	"github.com/fireflycons/geocoord"
 )
 
 var (
@@ -71,13 +72,13 @@ func NewApi() (*Api, error) {
 }
 
 // AircraftWithinRadius returns aircraft within radius nautical miles of coord.
-func (api *Api) AircraftWithinRadius(ctx context.Context, coord Coordinate, radius float64) (*V2Response, error) {
+func (api *Api) AircraftWithinRadius(ctx context.Context, coord geocoord.Coordinate, radius float64) (*V2Response, error) {
 
 	if radius <= 0 {
 		return nil, fmt.Errorf("radius must be greater than 0")
 	}
 
-	url := fmt.Sprintf("%s/v2/point/%f/%f/%f", api.baseUrl, coord.lat, coord.lon, radius)
+	url := fmt.Sprintf("%s/v2/point/%f/%f/%f", api.baseUrl, coord.Latitude(), coord.Longitude(), radius)
 
 	data, err := api.doRequest(ctx, url, normalHeaders)
 	if err != nil {

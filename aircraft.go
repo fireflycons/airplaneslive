@@ -3,6 +3,8 @@ package airplaneslive
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/fireflycons/geocoord"
 )
 
 // Pitch describes an aircraft's vertical direction.
@@ -250,18 +252,18 @@ func (a Aircraft) AirlineIcao() string {
 }
 
 // Location returns the aircraft's lat/long position as a coordinate.
-func (a Aircraft) Location() Coordinate {
-	return Coordinate{lat: a.Lat, lon: a.Lon}
+func (a Aircraft) Location() geocoord.Coordinate {
+	return geocoord.MustNewCoordinate(a.Lat, a.Lon)
 }
 
 // DistanceFrom calculates the distance the aircarft is from the given point.
-func (a Aircraft) DistanceFrom(point Coordinate) float64 {
+func (a Aircraft) DistanceFrom(point geocoord.Coordinate) float64 {
 
 	return point.DistanceTo(a.Location())
 }
 
 // BearingFrom calculates the initial bearing from this point to the aircraft.
-func (a Aircraft) BearingFrom(point Coordinate) float64 {
+func (a Aircraft) BearingFrom(point geocoord.Coordinate) float64 {
 
 	return point.HeadingTo(a.Location())
 }

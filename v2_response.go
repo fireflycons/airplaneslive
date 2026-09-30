@@ -3,6 +3,8 @@ package airplaneslive
 import (
 	"encoding/json"
 	"time"
+
+	"github.com/fireflycons/geocoord"
 )
 
 // V2Response represents the top-level aircraft v2 response envelope.
@@ -28,19 +30,19 @@ type V2Response struct {
 
 // ClosestTo returns the nearest aircraft, whether airborne or on the ground, to coord.
 // It returns nil if the response contains no aircraft.
-func (r V2Response) ClosestTo(coord Coordinate) *Aircraft {
+func (r V2Response) ClosestTo(coord geocoord.Coordinate) *Aircraft {
 
 	return r.closestTo(coord, false)
 }
 
 // ClosestToAirborne returns the nearest airborne aircraft to coord.
 // It returns nil if the response contains no airborne aircraft.
-func (r V2Response) ClosestToAirborne(coord Coordinate) *Aircraft {
+func (r V2Response) ClosestToAirborne(coord geocoord.Coordinate) *Aircraft {
 
 	return r.closestTo(coord, true)
 }
 
-func (r V2Response) closestTo(coord Coordinate, airborne bool) *Aircraft {
+func (r V2Response) closestTo(coord geocoord.Coordinate, airborne bool) *Aircraft {
 
 	const impossibleDistance float64 = 1e6
 

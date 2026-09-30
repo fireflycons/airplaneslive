@@ -6,10 +6,10 @@
 // Reference-data methods search or list airlines, airports, cities, countries,
 // and timezones.
 //
-// Coordinates use decimal degrees, with latitude in [-90, 90] and longitude in
-// [-180, 180]. [NewCoordinate] validates these ranges; [MustNewCoordinate]
-// panics when they are exceeded. Aircraft distances and radius values are in
-// nautical miles, and headings are in degrees.
+// Coordinates use [geocoord.Coordinate] values from github.com/fireflycons/geocoord.
+// Its NewCoordinate and MustNewCoordinate constructors validate latitude and
+// longitude ranges. Aircraft distances and radius values are in nautical miles,
+// and headings are in degrees.
 //
 // Reference-data results are paginated. Pass [DefaultListOpts] to request the
 // API's default page, then advance options with the returned list's
@@ -35,7 +35,7 @@
 //	if err != nil {
 //	    return err
 //	}
-//	point, err := airplaneslive.NewCoordinate(51.5074, -0.1278)
+//	point, err := geocoord.NewCoordinate(51.5074, -0.1278)
 //	if err != nil {
 //	    return err
 //	}
@@ -45,6 +45,7 @@
 //	}
 //	_ = response.Ac
 //
-// The examples assume code is inside a function returning an error. API
-// responses may omit aircraft fields when data is unavailable.
+// The examples assume code is inside a function returning an error and imports
+// context, github.com/fireflycons/airplaneslive, and github.com/fireflycons/geocoord.
+// API responses may omit aircraft fields when data is unavailable.
 package airplaneslive
