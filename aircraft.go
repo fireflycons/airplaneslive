@@ -252,20 +252,26 @@ func (a Aircraft) AirlineIcao() string {
 }
 
 // Location returns the aircraft's lat/long position as a coordinate.
-func (a Aircraft) Location() geocoord.Coordinate {
-	return geocoord.MustNewCoordinate(a.Lat, a.Lon)
+func (a Aircraft) Location() (geocoord.Coordinate, error) {
+	return geocoord.NewCoordinate(a.Lat, a.Lon)
 }
 
 // DistanceFrom calculates the distance the aircarft is from the given point.
-func (a Aircraft) DistanceFrom(point geocoord.Coordinate) float64 {
-
-	return point.DistanceTo(a.Location())
+func (a Aircraft) DistanceFrom(point geocoord.Coordinate) (float64, error) {
+	location, err := a.Location()
+	if err != nil {
+		return 0, err
+	}
+	return point.DistanceTo(location), nil
 }
 
 // BearingFrom calculates the initial bearing from this point to the aircraft.
-func (a Aircraft) BearingFrom(point geocoord.Coordinate) float64 {
-
-	return point.HeadingTo(a.Location())
+func (a Aircraft) BearingFrom(point geocoord.Coordinate) (float64, error) {
+	location, err := a.Location()
+	if err != nil {
+		return 0, err
+	}
+	return point.HeadingTo(location), nil
 }
 
 // Pitch returns the aircraft's vertical direction based on its barometric climb rate.

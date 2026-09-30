@@ -30,24 +30,22 @@ type V2Response struct {
 
 // ClosestTo returns the nearest aircraft, whether airborne or on the ground, to coord.
 // It returns nil if the response contains no aircraft.
-func (r V2Response) ClosestTo(coord geocoord.Coordinate) *Aircraft {
-
+func (r V2Response) ClosestTo(coord geocoord.Coordinate) (*Aircraft, error) {
 	return r.closestTo(coord, false)
 }
 
 // ClosestToAirborne returns the nearest airborne aircraft to coord.
 // It returns nil if the response contains no airborne aircraft.
-func (r V2Response) ClosestToAirborne(coord geocoord.Coordinate) *Aircraft {
-
+func (r V2Response) ClosestToAirborne(coord geocoord.Coordinate) (*Aircraft, error) {
 	return r.closestTo(coord, true)
 }
 
-func (r V2Response) closestTo(coord geocoord.Coordinate, airborne bool) *Aircraft {
+func (r V2Response) closestTo(coord geocoord.Coordinate, airborne bool) (*Aircraft, error) {
 
 	const impossibleDistance float64 = 1e6
 
 	if len(r.Ac) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	var result Aircraft
@@ -59,7 +57,11 @@ func (r V2Response) closestTo(coord geocoord.Coordinate, airborne bool) *Aircraf
 			continue
 		}
 
-		dist := coord.DistanceTo(ac.Location())
+		location, err := ac.Location()
+		if err != nil {
+			return nil, err
+		}
+		dist := coord.DistanceTo(location)
 		if dist < min_dist {
 			min_dist = dist
 			result = ac
@@ -67,10 +69,10 @@ func (r V2Response) closestTo(coord geocoord.Coordinate, airborne bool) *Aircraf
 	}
 
 	if min_dist < impossibleDistance {
-		return &result
+		return &result, nil
 	}
 
-	return nil
+	return nil, nil
 }
 
 // UnmarshalJSON decodes the response and converts millisecond timestamps to UTC times.

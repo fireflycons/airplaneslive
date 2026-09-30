@@ -57,9 +57,9 @@ The examples assume code is inside a function returning an error and imports con
 - [type Aircraft](<#Aircraft>)
   - [func \(a Aircraft\) AirlineIcao\(\) string](<#Aircraft.AirlineIcao>)
   - [func \(a Aircraft\) Bank\(\) Bank](<#Aircraft.Bank>)
-  - [func \(a Aircraft\) BearingFrom\(point geocoord.Coordinate\) float64](<#Aircraft.BearingFrom>)
-  - [func \(a Aircraft\) DistanceFrom\(point geocoord.Coordinate\) float64](<#Aircraft.DistanceFrom>)
-  - [func \(a Aircraft\) Location\(\) geocoord.Coordinate](<#Aircraft.Location>)
+  - [func \(a Aircraft\) BearingFrom\(point geocoord.Coordinate\) \(float64, error\)](<#Aircraft.BearingFrom>)
+  - [func \(a Aircraft\) DistanceFrom\(point geocoord.Coordinate\) \(float64, error\)](<#Aircraft.DistanceFrom>)
+  - [func \(a Aircraft\) Location\(\) \(geocoord.Coordinate, error\)](<#Aircraft.Location>)
   - [func \(a Aircraft\) Pitch\(\) Pitch](<#Aircraft.Pitch>)
 - [type Airline](<#Airline>)
 - [type AirlineList](<#AirlineList>)
@@ -99,8 +99,8 @@ The examples assume code is inside a function returning an error and imports con
 - [type TimezoneList](<#TimezoneList>)
   - [func \(l \*TimezoneList\) NextOffset\(o ListOpts\) ListOpts](<#TimezoneList.NextOffset>)
 - [type V2Response](<#V2Response>)
-  - [func \(r V2Response\) ClosestTo\(coord geocoord.Coordinate\) \*Aircraft](<#V2Response.ClosestTo>)
-  - [func \(r V2Response\) ClosestToAirborne\(coord geocoord.Coordinate\) \*Aircraft](<#V2Response.ClosestToAirborne>)
+  - [func \(r V2Response\) ClosestTo\(coord geocoord.Coordinate\) \(\*Aircraft, error\)](<#V2Response.ClosestTo>)
+  - [func \(r V2Response\) ClosestToAirborne\(coord geocoord.Coordinate\) \(\*Aircraft, error\)](<#V2Response.ClosestToAirborne>)
   - [func \(r V2Response\) MarshalJSON\(\) \(\[\]byte, error\)](<#V2Response.MarshalJSON>)
   - [func \(r \*V2Response\) UnmarshalJSON\(data \[\]byte\) error](<#V2Response.UnmarshalJSON>)
 
@@ -338,7 +338,7 @@ func (a Aircraft) AirlineIcao() string
 AirlineIcao returns the ICAO airline code derived from the first three characters of the flight callsign.
 
 <a name="Aircraft.Bank"></a>
-### func \(Aircraft\) [Bank](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L284>)
+### func \(Aircraft\) [Bank](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L290>)
 
 ```go
 func (a Aircraft) Bank() Bank
@@ -347,10 +347,10 @@ func (a Aircraft) Bank() Bank
 Bank returns the aircraft's turn direction based on its roll angle.
 
 <a name="Aircraft.BearingFrom"></a>
-### func \(Aircraft\) [BearingFrom](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L266>)
+### func \(Aircraft\) [BearingFrom](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L269>)
 
 ```go
-func (a Aircraft) BearingFrom(point geocoord.Coordinate) float64
+func (a Aircraft) BearingFrom(point geocoord.Coordinate) (float64, error)
 ```
 
 BearingFrom calculates the initial bearing from this point to the aircraft.
@@ -359,7 +359,7 @@ BearingFrom calculates the initial bearing from this point to the aircraft.
 ### func \(Aircraft\) [DistanceFrom](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L260>)
 
 ```go
-func (a Aircraft) DistanceFrom(point geocoord.Coordinate) float64
+func (a Aircraft) DistanceFrom(point geocoord.Coordinate) (float64, error)
 ```
 
 DistanceFrom calculates the distance the aircarft is from the given point.
@@ -368,13 +368,13 @@ DistanceFrom calculates the distance the aircarft is from the given point.
 ### func \(Aircraft\) [Location](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L255>)
 
 ```go
-func (a Aircraft) Location() geocoord.Coordinate
+func (a Aircraft) Location() (geocoord.Coordinate, error)
 ```
 
 Location returns the aircraft's lat/long position as a coordinate.
 
 <a name="Aircraft.Pitch"></a>
-### func \(Aircraft\) [Pitch](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L272>)
+### func \(Aircraft\) [Pitch](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L278>)
 
 ```go
 func (a Aircraft) Pitch() Pitch
@@ -494,7 +494,7 @@ func (l *AirportList) NextOffset(o ListOpts) ListOpts
 NextOffset returns list options advanced by the number of results in the page.
 
 <a name="AltBaro"></a>
-## type [AltBaro](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L314-L319>)
+## type [AltBaro](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L320-L325>)
 
 AltBaro represents barometric altitude, which may be an integer altitude or the value "ground".
 
@@ -508,7 +508,7 @@ type AltBaro struct {
 ```
 
 <a name="AltBaro.MarshalJSON"></a>
-### func \(AltBaro\) [MarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L343>)
+### func \(AltBaro\) [MarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L349>)
 
 ```go
 func (a AltBaro) MarshalJSON() ([]byte, error)
@@ -517,7 +517,7 @@ func (a AltBaro) MarshalJSON() ([]byte, error)
 MarshalJSON encodes the altitude as an integer or the string "ground".
 
 <a name="AltBaro.UnmarshalJSON"></a>
-### func \(\*AltBaro\) [UnmarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L322>)
+### func \(\*AltBaro\) [UnmarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L328>)
 
 ```go
 func (a *AltBaro) UnmarshalJSON(b []byte) error
@@ -806,7 +806,7 @@ func (p Pitch) String() string
 String returns the textual description of the pitch direction.
 
 <a name="Pos"></a>
-## type [Pos](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L296-L311>)
+## type [Pos](<https://github.com/fireflycons/airplaneslive/blob/main/aircraft.go#L302-L317>)
 
 Pos represents last known position object details.
 
@@ -899,22 +899,22 @@ type V2Response struct {
 ### func \(V2Response\) [ClosestTo](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L33>)
 
 ```go
-func (r V2Response) ClosestTo(coord geocoord.Coordinate) *Aircraft
+func (r V2Response) ClosestTo(coord geocoord.Coordinate) (*Aircraft, error)
 ```
 
 ClosestTo returns the nearest aircraft, whether airborne or on the ground, to coord. It returns nil if the response contains no aircraft.
 
 <a name="V2Response.ClosestToAirborne"></a>
-### func \(V2Response\) [ClosestToAirborne](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L40>)
+### func \(V2Response\) [ClosestToAirborne](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L39>)
 
 ```go
-func (r V2Response) ClosestToAirborne(coord geocoord.Coordinate) *Aircraft
+func (r V2Response) ClosestToAirborne(coord geocoord.Coordinate) (*Aircraft, error)
 ```
 
 ClosestToAirborne returns the nearest airborne aircraft to coord. It returns nil if the response contains no airborne aircraft.
 
 <a name="V2Response.MarshalJSON"></a>
-### func \(V2Response\) [MarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L104>)
+### func \(V2Response\) [MarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L106>)
 
 ```go
 func (r V2Response) MarshalJSON() ([]byte, error)
@@ -923,7 +923,7 @@ func (r V2Response) MarshalJSON() ([]byte, error)
 MarshalJSON encodes UTC times as millisecond Unix timestamps.
 
 <a name="V2Response.UnmarshalJSON"></a>
-### func \(\*V2Response\) [UnmarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L77>)
+### func \(\*V2Response\) [UnmarshalJSON](<https://github.com/fireflycons/airplaneslive/blob/main/v2_response.go#L79>)
 
 ```go
 func (r *V2Response) UnmarshalJSON(data []byte) error

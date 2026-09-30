@@ -27,7 +27,19 @@ func main() {
 
 	fmt.Printf("%d Aircraft within radius\n", len(response.Ac))
 
-	if closestPlane := response.ClosestTo(london); closestPlane != nil {
+	closestPlane, err := response.ClosestTo(london)
+	if err != nil {
+		log.Fatalf("Failed to find closest aircraft: %v", err)
+	}
+	if closestPlane != nil {
+		distance, err := closestPlane.DistanceFrom(london)
+		if err != nil {
+			log.Fatalf("Failed to calculate aircraft distance: %v", err)
+		}
+		bearing, err := closestPlane.BearingFrom(london)
+		if err != nil {
+			log.Fatalf("Failed to calculate aircraft bearing: %v", err)
+		}
 
 		fmt.Printf(
 			"Closest plane to central London: %s (type: %s, heading: %.1f, alt: %d, climb: %s, bank: %s, dist: %.1f, bearing: %.1f)",
@@ -37,8 +49,8 @@ func main() {
 			closestPlane.AltBaro.Altitude,
 			closestPlane.Pitch(),
 			closestPlane.Bank(),
-			closestPlane.DistanceFrom(london),
-			closestPlane.BearingFrom(london),
+			distance,
+			bearing,
 		)
 	}
 }
