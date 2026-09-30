@@ -40,6 +40,7 @@ for {
     if err != nil {
         return err
     }
+    // Do something with page, then
     if len(page.Results) == 0 {
         break
     }
@@ -48,3 +49,7 @@ for {
 ```
 
 API responses may omit aircraft fields when data is unavailable.
+
+## Package Documentation
+
+See [here](./docs/package.md)

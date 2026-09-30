@@ -1,0 +1,74 @@
+name: Go
+
+on:
+  push:
+    branches:
+      - "**"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.14.0
+
+      - name: Run unit tests
+        run: go test ./...
+
+  release:
+    name: Create release
+    needs: test
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version and release notes
+        id: release
+        shell: bash
+        run: |
+          latest_tag="$(git tag --list 'v[0-9]*' --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)"
+
+          if [[ -z "$latest_tag" ]]; then
+            version="v0.1.0"
+            commits="$(git log --reverse --pretty=format:'- %h %s' HEAD)"
+          else
+            IFS=. read -r major minor patch <<< "${latest_tag#v}"
+            version="v${major}.${minor}.$((patch + 1))"
+            commits="$(git log --reverse --pretty=format:'- %h %s' "${latest_tag}..HEAD")"
+          fi
+
+          if [[ -z "$commits" ]]; then
+            commits="- No commits found."
+          fi
+
+          {
+            printf '## Commits\n\n%s\n' "$commits"
+          } > "$RUNNER_TEMP/release-notes.md"
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Create tag and GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ steps.release.outputs.version }}" --title "${{ steps.release.outputs.version }}" --notes-file "$RUNNER_TEMP/release-notes.md"
