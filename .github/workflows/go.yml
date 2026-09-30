@@ -69,6 +69,28 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Create tag and GitHub release
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ steps.release.outputs.version }}" --title "${{ steps.release.outputs.version }}" --notes-file "$RUNNER_TEMP/release-notes.md"
+        run: |
+          version="${{ steps.release.outputs.version }}"
+
+          for attempt in {1..5}; do
+            if gh release view "$version" >/dev/null 2>&1; then
+              echo "Release $version already exists."
+              exit 0
+            fi
+
+            if gh release create "$version" --title "$version" --notes-file "$RUNNER_TEMP/release-notes.md"; then
+              exit 0
+            fi
+
+            if [[ "$attempt" -eq 5 ]]; then
+              echo "::error::Failed to create release $version after $attempt attempts."
+              exit 1
+            fi
+
+            delay=$((2 ** attempt))
+            echo "Release creation failed; retrying in ${delay}s (attempt $((attempt + 1)) of 5)."
+            sleep "$delay"
+          done
